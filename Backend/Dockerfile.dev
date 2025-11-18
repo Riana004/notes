@@ -1,12 +1,14 @@
-# Dockerfile.dev
 FROM eclipse-temurin:17-jdk-alpine
 
 WORKDIR /app
 
-# Copier les fichiers de build d'abord
+# Copier les fichiers de build
 COPY pom.xml .
 COPY mvnw .
 COPY .mvn .mvn
+
+# Rendre le script exécutable
+RUN chmod +x ./mvnw
 
 # Installer les dépendances
 RUN ./mvnw dependency:go-offline -B
