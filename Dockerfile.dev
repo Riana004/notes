@@ -1,0 +1,20 @@
+# Dockerfile.dev
+FROM eclipse-temurin:17-jdk-alpine
+
+WORKDIR /app
+
+# Copier les fichiers de build d'abord
+COPY pom.xml .
+COPY mvnw .
+COPY .mvn .mvn
+
+# Installer les dépendances
+RUN ./mvnw dependency:go-offline -B
+
+# Copier le code source
+COPY src ./src
+
+EXPOSE 8080
+
+# Commande de développement
+CMD ["./mvnw", "spring-boot:run"]

@@ -1,0 +1,39 @@
+Inscription(
+    idEtudiant,
+    idSemestre
+)
+Etudiant(
+    id,
+    nom, 
+    prenom, 
+    ETU unique   
+);
+Semestre(
+    id,
+    nom
+);
+Matiere(
+    id, 
+    idSemestre,
+    code, 
+    intitule,
+    credit
+);
+Note(
+    id, 
+    idMatiere, 
+    idEtudiant, 
+    idSession, 
+    valeur
+);
+Session(
+    id, 
+    periodeAnnee, 
+    periodeMois, 
+    idAnneeUniversitaire
+);
+AnneeUniversitaire(
+    id, 
+    AnneeDebut, 
+    AnneeFin
+)
