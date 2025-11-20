@@ -1,77 +1,78 @@
 -- ============================
--- TABLE AnneeEtude
+-- TABLE annee_etude
 -- ============================
-CREATE TABLE AnneeEtude (
+CREATE TABLE annee_etude (
     id SERIAL PRIMARY KEY,
     nom VARCHAR(100) NOT NULL
 );
 
 -- ============================
--- TABLE Etudiant
+-- TABLE etudiant
 -- ============================
-CREATE TABLE Etudiant (
+CREATE TABLE etudiant (
     id SERIAL PRIMARY KEY,
     nom VARCHAR(100) NOT NULL,
     prenom VARCHAR(100) NOT NULL,
-    ETU VARCHAR(50) UNIQUE NOT NULL
+    etu VARCHAR(50) UNIQUE NOT NULL
 );
 
 -- ============================
--- TABLE AnneeUniversitaire
+-- TABLE annee_universitaire
 -- ============================
-CREATE TABLE AnneeUniversitaire (
+CREATE TABLE annee_universitaire (
     id SERIAL PRIMARY KEY,
-    AnneeDebut INT NOT NULL,
-    AnneeFin INT NOT NULL
+    annee_debut INT NOT NULL,
+    annee_fin INT NOT NULL
 );
 
 -- ============================
--- TABLE Session
+-- TABLE session
 -- ============================
-CREATE TABLE Session (
+CREATE TABLE session (
     id SERIAL PRIMARY KEY,
-    periodeAnnee INT NOT NULL,
-    periodeMois INT NOT NULL,
-    idAnneeUniversitaire INT NOT NULL REFERENCES AnneeUniversitaire(id)
+    periode_annee INT NOT NULL,
+    periode_mois INT NOT NULL,
+    id_annee_universitaire INT NOT NULL REFERENCES annee_universitaire(id)
 );
 
 -- ============================
--- TABLE Inscription
+-- TABLE inscription
 -- ============================
-CREATE TABLE Inscription (
-    idEtudiant INT NOT NULL REFERENCES Etudiant(id),
-    idAnneeEtude INT NOT NULL REFERENCES AnneeEtude(id),
-
-    PRIMARY KEY (idEtudiant, idAnneeEtude)
+CREATE TABLE inscription (
+    id_etudiant INT NOT NULL REFERENCES etudiant(id),
+    id_annee_etude INT NOT NULL REFERENCES annee_etude(id),
+    id_annee_universitaire INT NOT NULL REFERENCES annee_universitaire(id),
+    
+    PRIMARY KEY (id_etudiant, id_annee_etude, id_annee_universitaire)
 );
 
 -- ============================
--- TABLE Semestre
+-- TABLE semestre
 -- ============================
-CREATE TABLE Semestre (
+CREATE TABLE semestre (
     id SERIAL PRIMARY KEY,
-    idAnneeEtude INT NOT NULL REFERENCES AnneeEtude(id),
+    id_annee_etude INT NOT NULL REFERENCES annee_etude(id),
     nom VARCHAR(100) NOT NULL
 );
 
 -- ============================
--- TABLE Matiere
+-- TABLE matiere
 -- ============================
-CREATE TABLE Matiere (
+CREATE TABLE matiere (
     id SERIAL PRIMARY KEY,
-    idSemestre INT NOT NULL REFERENCES Semestre(id),
+    id_semestre INT NOT NULL REFERENCES semestre(id),
     code VARCHAR(50) NOT NULL,
     intitule VARCHAR(150) NOT NULL,
     credit INT NOT NULL
 );
 
 -- ============================
--- TABLE Note
+-- TABLE note
 -- ============================
-CREATE TABLE Note (
+CREATE TABLE note (
     id SERIAL PRIMARY KEY,
-    idMatiere INT NOT NULL REFERENCES Matiere(id),
-    idEtudiant INT NOT NULL REFERENCES Etudiant(id),
-    idSession INT NOT NULL REFERENCES Session(id),
+    id_matiere INT NOT NULL REFERENCES matiere(id),
+    id_etudiant INT NOT NULL REFERENCES etudiant(id),
+    id_session INT NOT NULL REFERENCES session(id),
     valeur NUMERIC(5,2) NOT NULL
 );

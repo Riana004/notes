@@ -2,21 +2,18 @@ FROM eclipse-temurin:17-jdk-alpine
 
 WORKDIR /app
 
-# Copier les fichiers de build
+# Installer Maven
+RUN apk add --no-cache maven
+
+# Copier pom.xml et télécharger les dépendances
 COPY pom.xml .
-COPY mvnw .
-COPY .mvn .mvn
-
-# Rendre le script exécutable
-RUN chmod +x ./mvnw
-
-# Installer les dépendances
-RUN ./mvnw dependency:go-offline -B
+RUN mvn dependency:go-offline -B
 
 # Copier le code source
-COPY src ./src
+COPY src src
 
+# Exposer le port
 EXPOSE 8080
 
-# Commande de développement
-CMD ["./mvnw", "spring-boot:run"]
+# Commande pour démarrer l'application
+CMD ["mvn", "spring-boot:run"]

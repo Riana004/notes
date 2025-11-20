@@ -1,10 +1,9 @@
 package com.notes.notes.repository;
 
+import com.notes.notes.entity.Matiere;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import com.notes.notes.entity.Categorie;
-
 @Repository
-public interface CategorieRepository extends JpaRepository<Categorie, Long> {
+public interface MatiereRepository extends JpaRepository<Matiere, Long> {
 }
