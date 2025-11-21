@@ -1,54 +1,74 @@
 package com.notes.notes.controller;
 
-import com.notes.notes.dto.ApiResponse;
-import com.notes.notes.dto.NotesResponse;
+import com.notes.notes.dto.*;
 import com.notes.notes.service.NotesService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
-// @RequestMapping("/api/notes")
+@RequestMapping("/api/notes")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "*")
 public class NotesController {
-    
+
     private final NotesService notesService;
-    
+
     /**
-     * Récupère les notes d'un étudiant pour un semestre donné
-     * @param etu Numéro ETU de l'étudiant
-     * @param semestre Nom du semestre (ex: "Semestre 1", "Semestre 2", etc.)
-     * @return ApiResponse contenant les notes, la moyenne et les crédits
-     * 
-     * Exemple: GET /api/notes/etudiant/ETU001/semestre/Semestre 1
+     * Endpoint 1: Liste des semestres
+     * GET /api/notes/semestres
      */
-    @GetMapping("/etudiants/{etu}/semestres/{semestre}")
-    public ResponseEntity<ApiResponse<NotesResponse>> getNotesBySemestre(
-            @PathVariable String etu,
-            @PathVariable String semestre) {
-        
-        // Remplacer les underscores par des espaces si nécessaire
-        String semestreNom = semestre.replace("_", " ");
-        NotesResponse response = notesService.getNotesBySemestre(etu, semestreNom);
-        return ResponseEntity.ok(ApiResponse.success(response));
+    @GetMapping("/semestres")
+    public ResponseEntity<ApiResponse<List<SemestreDTO>>> getAllSemestres() {
+        List<SemestreDTO> semestres = notesService.getAllSemestres();
+        return ResponseEntity.ok(ApiResponse.success(semestres));
     }
-    
+
     /**
-     * Récupère les notes d'un étudiant pour une année d'étude donnée
-     * @param etu Numéro ETU de l'étudiant
-     * @param annee Nom de l'année (ex: "Licence 1", "Licence 2", "Master 1", etc.)
-     * @return ApiResponse contenant les notes, la moyenne et les crédits
-     * 
-     * Exemple: GET /api/notes/etudiant/ETU001/annee/Licence 1
+     * Endpoint 2: Liste des étudiants avec leurs moyennes S1 à S4
+     * GET /api/notes/etudiants/moyennes
      */
-    @GetMapping("/etudiants/{etu}/annees/{annee}")
-    public ResponseEntity<ApiResponse<NotesResponse>> getNotesByAnnee(
-            @PathVariable String etu,
-            @PathVariable String annee) {
-        
-        // Remplacer les underscores par des espaces si nécessaire
-        String anneeNom = annee.replace("_", " ");
-        NotesResponse response = notesService.getNotesByAnnee(etu, anneeNom);
-        return ResponseEntity.ok(ApiResponse.success(response));
+    @GetMapping("/etudiants/moyennes")
+    public ResponseEntity<ApiResponse<List<EtudiantMoyennesDTO>>> getEtudiantsAvecMoyennes() {
+        List<EtudiantMoyennesDTO> etudiants = notesService.getEtudiantsAvecMoyennes();
+        return ResponseEntity.ok(ApiResponse.success(etudiants));
+    }
+
+    /**
+     * Endpoint 3: Relevé de note d'un étudiant pour un semestre donné
+     * GET /api/notes/etudiants/{idEtudiant}/releve/{semestre}
+     * Paramètre optionnel: parcours (requis pour S4)
+     */
+    @GetMapping("/etudiants/{idEtudiant}/releve/{semestre}")
+    public ResponseEntity<ApiResponse<ReleveNoteDTO>> getReleveNote(
+            @PathVariable Long idEtudiant,
+            @PathVariable String semestre,
+            @RequestParam(required = false) String parcours) {
+        ReleveNoteDTO releve = notesService.getReleveNote(idEtudiant, semestre, parcours);
+        return ResponseEntity.ok(ApiResponse.success(releve));
+    }
+
+    /**
+     * Endpoint 4: Info d'un étudiant avec les moyennes S1 à S4
+     * GET /api/notes/etudiants/{idEtudiant}/info
+     */
+    @GetMapping("/etudiants/{idEtudiant}/info")
+    public ResponseEntity<ApiResponse<EtudiantInfoDTO>> getEtudiantInfo(@PathVariable Long idEtudiant) {
+        EtudiantInfoDTO info = notesService.getEtudiantInfo(idEtudiant);
+        return ResponseEntity.ok(ApiResponse.success(info));
+    }
+
+    /**
+     * Endpoint 5: Notes par semestre pour une année universitaire (L1 ou L2) d'un étudiant
+     * GET /api/notes/etudiants/{idEtudiant}/annee/{anneeUniversitaire}
+     */
+    @GetMapping("/etudiants/{idEtudiant}/annee/{anneeUniversitaire}")
+    public ResponseEntity<ApiResponse<List<NotesSemestreAnneeDTO>>> getNotesSemestreParAnnee(
+            @PathVariable Long idEtudiant,
+            @PathVariable String anneeUniversitaire) {
+        List<NotesSemestreAnneeDTO> notes = notesService.getNotesSemestreParAnnee(idEtudiant, anneeUniversitaire);
+        return ResponseEntity.ok(ApiResponse.success(notes));
     }
 }
