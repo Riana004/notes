@@ -1,21 +1,59 @@
 <!-- components/SemesterList.vue -->
 <script>
+import { API_ENDPOINTS } from '../config'
+
 export default {
   name: 'SemesterList',
-  props: ['fetchData'],
   data() {
     return {
-      semesters: []
+      semesters: [],
+      isLoaded: false,
+      isFetching: false,
+      error: null
     }
   },
   async mounted() {
+    console.log('SemesterList mounted - should only appear once')
     await this.loadSemesters()
   },
   methods: {
     async loadSemesters() {
-      const data = await this.fetchData('http://localhost:8080/api/notes/semestres')
-      if (data) {
-        this.semesters = data
+      console.log('loadSemesters called, isLoaded:', this.isLoaded, 'isFetching:', this.isFetching)
+      
+      // Double protection contre les appels multiples
+      if (this.isLoaded || this.isFetching) {
+        console.log('Already loaded or fetching, returning')
+        return
+      }
+      
+      this.isFetching = true
+      this.error = null
+      console.log('Fetching semesters from:', API_ENDPOINTS.semestres)
+      
+      try {
+        const response = await fetch(API_ENDPOINTS.semestres, {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        })
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`)
+        }
+        
+        const result = await response.json()
+        const data = result.data || result
+        
+        if (data) {
+          this.semesters = data
+          this.isLoaded = true
+          console.log('Semesters loaded successfully:', data)
+        }
+      } catch (err) {
+        this.error = err.message
+        console.error('Error loading semesters:', err)
+      } finally {
+        this.isFetching = false
       }
     },
     showStudents() {

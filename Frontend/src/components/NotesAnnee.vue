@@ -1,25 +1,60 @@
 <!-- components/NotesAnnee.vue -->
 <script>
+import { API_ENDPOINTS } from '../config'
+
 export default {
   name: 'NotesAnnee',
-  props: ['selectedStudent', 'selectedAnnee', 'fetchData'],
+  props: ['selectedStudent', 'selectedAnnee'],
   data() {
     return {
-      notesAnnee: []
+      notesAnnee: [],
+      isLoaded: false,
+      isFetching: false,
+      loadedKey: null,
+      error: null
     }
   },
   async mounted() {
+    console.log('NotesAnnee mounted for:', this.selectedAnnee)
     if (this.selectedStudent && this.selectedAnnee) {
       await this.loadNotesAnnee()
     }
   },
   methods: {
     async loadNotesAnnee() {
-      const data = await this.fetchData(
-        `http://localhost:8080/api/notes/etudiants/${this.selectedStudent.idEtudiant}/annee/${this.selectedAnnee}`
-      )
-      if (data) {
-        this.notesAnnee = data
+      const key = `${this.selectedStudent.idEtudiant}-${this.selectedAnnee}`
+      
+      if ((this.isLoaded || this.isFetching) && this.loadedKey === key) {
+        console.log('NotesAnnee already loaded for this key')
+        return
+      }
+      
+      this.isFetching = true
+      this.error = null
+      const url = API_ENDPOINTS.notesAnnee(this.selectedStudent.idEtudiant, this.selectedAnnee)
+      console.log('Fetching notes annee from:', url)
+      
+      try {
+        const response = await fetch(url, {
+          headers: { 'Content-Type': 'application/json' }
+        })
+        
+        if (!response.ok) throw new Error(`HTTP ${response.status}`)
+        
+        const result = await response.json()
+        const data = result.data || result
+        
+        if (data) {
+          this.notesAnnee = data
+          this.isLoaded = true
+          this.loadedKey = key
+          console.log('Notes annee loaded')
+        }
+      } catch (err) {
+        this.error = err.message
+        console.error('Error loading notes annee:', err)
+      } finally {
+        this.isFetching = false
       }
     },
     goBack() {

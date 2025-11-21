@@ -31,28 +31,28 @@ export default {
     }
   },
   methods: {
-    async showSemesters() {
+    showSemesters() {
       this.currentView = 'SemesterList'
       this.clearSelectedData()
     },
     
-    async showStudents() {
+    showStudents() {
       this.currentView = 'StudentsList'
     },
     
-    async showReleve(student, semestre, parcours = null) {
+    showReleve(student, semestre, parcours = null) {
       this.selectedStudent = student
       this.selectedSemestre = semestre
       this.selectedParcours = parcours
       this.currentView = 'ReleveNotes'
     },
     
-    async showEtudiantInfo(student) {
+    showEtudiantInfo(student) {
       this.selectedStudent = student
       this.currentView = 'EtudiantInfo'
     },
     
-    async showNotesAnnee(student, annee) {
+    showNotesAnnee(student, annee) {
       this.selectedStudent = student
       this.selectedAnnee = annee
       this.currentView = 'NotesAnnee'
@@ -71,16 +71,48 @@ export default {
     },
     
     async fetchData(url) {
+      // Éviter les appels en double
+      if (this.loading) {
+        console.log('Appel en cours, ignoré:', url)
+        return null
+      }
+      
       this.loading = true
       this.error = null
       try {
-        const response = await fetch(url)
-        if (!response.ok) throw new Error('Erreur API')
+        console.log('Fetching:', url)
+        // Ajouter un timeout de 10 secondes
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => controller.abort(), 10000)
+        
+        const response = await fetch(url, { 
+          signal: controller.signal,
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        })
+        
+        clearTimeout(timeoutId)
+        
+        if (!response.ok) {
+          throw new Error(`Erreur HTTP: ${response.status}`)
+        }
+        
         const data = await response.json()
-        return data.data // Extrait les données de ApiResponse
+        console.log('Données reçues:', data)
+        
+        // Gestion de ApiResponse<T>
+        if (data && data.data !== undefined) {
+          return data.data
+        }
+        return data
       } catch (err) {
-        this.error = 'Erreur de chargement des données'
-        console.error(err)
+        if (err.name === 'AbortError') {
+          this.error = 'Timeout: Le serveur ne répond pas. Vérifiez que le backend Docker est démarré.'
+        } else {
+          this.error = `Erreur de chargement: ${err.message}. Vérifiez que le backend est accessible sur http://localhost:8080`
+        }
+        console.error('Erreur fetch:', err)
         return null
       } finally {
         this.loading = false
@@ -99,20 +131,20 @@ export default {
     <div class="main">
       <div v-if="loading" class="loading">Chargement...</div>
       <div v-else-if="error" class="error">{{ error }}</div>
-      <component 
-        v-else
-        :is="currentView" 
-        :selectedStudent="selectedStudent"
-        :selectedSemestre="selectedSemestre"
-        :selectedAnnee="selectedAnnee"
-        :selectedParcours="selectedParcours"
-        :fetchData="fetchData"
-        @show-students="showStudents"
-        @show-releve="showReleve"
-        @show-etudiant-info="showEtudiantInfo"
-        @show-notes-annee="showNotesAnnee"
-        @go-back="showHome"
-      />
+      <keep-alive v-else>
+        <component 
+          :is="currentView"
+          :selectedStudent="selectedStudent"
+          :selectedSemestre="selectedSemestre"
+          :selectedAnnee="selectedAnnee"
+          :selectedParcours="selectedParcours"
+          @show-students="showStudents"
+          @show-releve="showReleve"
+          @show-etudiant-info="showEtudiantInfo"
+          @show-notes-annee="showNotesAnnee"
+          @go-back="showHome"
+        />
+      </keep-alive>
     </div>
   </div>
 </template>
@@ -167,5 +199,19 @@ html, body {
 
 .error {
   color: #e74c3c;
+  background: #2d1f1f;
+  border: 1px solid #e74c3c;
+  border-radius: 8px;
+  margin: 20px auto;
+  max-width: 600px;
+  padding: 30px;
+  line-height: 1.6;
+}
+
+.error::before {
+  content: '⚠️ ';
+  font-size: 2em;
+  display: block;
+  margin-bottom: 10px;
 }
 </style>

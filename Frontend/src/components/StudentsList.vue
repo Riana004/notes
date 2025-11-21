@@ -1,14 +1,19 @@
 <!-- components/StudentsList.vue -->
 <script>
+import { API_ENDPOINTS } from '../config'
+
 export default {
   name: 'StudentsList',
-  props: ['selectedStudent', 'selectedSemestre', 'fetchData'],
   data() {
     return {
-      students: []
+      students: [],
+      isLoaded: false,
+      isFetching: false,
+      error: null
     }
   },
   async mounted() {
+    console.log('StudentsList mounted')
     await this.loadStudents()
   },
   computed: {
@@ -21,9 +26,35 @@ export default {
   },
   methods: {
     async loadStudents() {
-      const data = await this.fetchData('http://localhost:8080/api/notes/etudiants/moyennes')
-      if (data) {
-        this.students = data
+      if (this.isLoaded || this.isFetching) {
+        console.log('StudentsList already loaded or fetching')
+        return
+      }
+      
+      this.isFetching = true
+      this.error = null
+      console.log('Fetching students from:', API_ENDPOINTS.etudiantsMoyennes)
+      
+      try {
+        const response = await fetch(API_ENDPOINTS.etudiantsMoyennes, {
+          headers: { 'Content-Type': 'application/json' }
+        })
+        
+        if (!response.ok) throw new Error(`HTTP ${response.status}`)
+        
+        const result = await response.json()
+        const data = result.data || result
+        
+        if (data) {
+          this.students = data
+          this.isLoaded = true
+          console.log('Students loaded:', data.length)
+        }
+      } catch (err) {
+        this.error = err.message
+        console.error('Error loading students:', err)
+      } finally {
+        this.isFetching = false
       }
     },
     goBack() {

@@ -1,30 +1,65 @@
 <!-- components/ReleveNotes.vue -->
 <script>
+import { API_ENDPOINTS } from '../config'
+
 export default {
   name: 'ReleveNotes',
-  props: ['selectedStudent', 'selectedSemestre', 'selectedParcours', 'fetchData'],
+  props: ['selectedStudent', 'selectedSemestre', 'selectedParcours'],
   data() {
     return {
-      releve: null
+      releve: null,
+      isLoaded: false,
+      isFetching: false,
+      loadedKey: null,
+      error: null
     }
   },
   async mounted() {
+    console.log('ReleveNotes mounted for:', this.selectedSemestre, this.selectedParcours)
     if (this.selectedStudent && this.selectedSemestre) {
       await this.loadReleve()
     }
   },
   methods: {
     async loadReleve() {
-      let url = `http://localhost:8080/api/notes/etudiants/${this.selectedStudent.idEtudiant}/releve/${this.selectedSemestre}`
+      const key = `${this.selectedStudent.idEtudiant}-${this.selectedSemestre}-${this.selectedParcours || ''}`
       
-      // Ajouter le paramètre parcours pour S4
+      if ((this.isLoaded || this.isFetching) && this.loadedKey === key) {
+        console.log('ReleveNotes already loaded for this key')
+        return
+      }
+      
+      this.isFetching = true
+      this.error = null
+      
+      let url = API_ENDPOINTS.releveNote(this.selectedStudent.idEtudiant, this.selectedSemestre)
       if (this.selectedSemestre === 'S4' && this.selectedParcours) {
         url += `?parcours=${encodeURIComponent(this.selectedParcours)}`
       }
       
-      const data = await this.fetchData(url)
-      if (data) {
-        this.releve = data
+      console.log('Fetching releve from:', url)
+      
+      try {
+        const response = await fetch(url, {
+          headers: { 'Content-Type': 'application/json' }
+        })
+        
+        if (!response.ok) throw new Error(`HTTP ${response.status}`)
+        
+        const result = await response.json()
+        const data = result.data || result
+        
+        if (data) {
+          this.releve = data
+          this.isLoaded = true
+          this.loadedKey = key
+          console.log('Releve loaded')
+        }
+      } catch (err) {
+        this.error = err.message
+        console.error('Error loading releve:', err)
+      } finally {
+        this.isFetching = false
       }
     },
     goBack() {

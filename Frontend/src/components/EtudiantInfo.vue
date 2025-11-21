@@ -1,25 +1,58 @@
 <!-- components/EtudiantInfo.vue -->
 <script>
+import { API_ENDPOINTS } from '../config'
+
 export default {
   name: 'EtudiantInfo',
-  props: ['selectedStudent', 'fetchData'],
+  props: ['selectedStudent'],
   data() {
     return {
-      etudiantInfo: null
+      etudiantInfo: null,
+      isLoaded: false,
+      isFetching: false,
+      loadedStudentId: null,
+      error: null
     }
   },
   async mounted() {
+    console.log('EtudiantInfo mounted for student:', this.selectedStudent)
     if (this.selectedStudent) {
       await this.loadEtudiantInfo()
     }
   },
   methods: {
     async loadEtudiantInfo() {
-      const data = await this.fetchData(
-        `http://localhost:8080/api/notes/etudiants/${this.selectedStudent.idEtudiant}/info`
-      )
-      if (data) {
-        this.etudiantInfo = data
+      if ((this.isLoaded || this.isFetching) && this.loadedStudentId === this.selectedStudent.idEtudiant) {
+        console.log('EtudiantInfo already loaded for this student')
+        return
+      }
+      
+      this.isFetching = true
+      this.error = null
+      const url = API_ENDPOINTS.etudiantInfo(this.selectedStudent.idEtudiant)
+      console.log('Fetching etudiant info from:', url)
+      
+      try {
+        const response = await fetch(url, {
+          headers: { 'Content-Type': 'application/json' }
+        })
+        
+        if (!response.ok) throw new Error(`HTTP ${response.status}`)
+        
+        const result = await response.json()
+        const data = result.data || result
+        
+        if (data) {
+          this.etudiantInfo = data
+          this.isLoaded = true
+          this.loadedStudentId = this.selectedStudent.idEtudiant
+          console.log('Etudiant info loaded')
+        }
+      } catch (err) {
+        this.error = err.message
+        console.error('Error loading etudiant info:', err)
+      } finally {
+        this.isFetching = false
       }
     },
     goBack() {
