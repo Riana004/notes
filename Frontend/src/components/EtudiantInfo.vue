@@ -2,31 +2,34 @@
 <script>
 export default {
   name: 'EtudiantInfo',
+  props: ['selectedStudent', 'fetchData'],
   data() {
     return {
-      etudiant: {
-        idEtudiant: 1,
-        matricule: "ET001",
-        nom: "Dupont",
-        prenom: "Jean",
-        moyenneS1: 14.5,
-        moyenneS2: 15.2,
-        moyenneS3: 13.8,
-        moyenneS4Dev: 16.0,
-        moyenneS4Web: 14.5,
-        moyenneS4BDD: 15.8
-      }
+      etudiantInfo: null
+    }
+  },
+  async mounted() {
+    if (this.selectedStudent) {
+      await this.loadEtudiantInfo()
     }
   },
   methods: {
+    async loadEtudiantInfo() {
+      const data = await this.fetchData(
+        `http://localhost:8080/api/notes/etudiants/${this.selectedStudent.idEtudiant}/info`
+      )
+      if (data) {
+        this.etudiantInfo = data
+      }
+    },
     goBack() {
       this.$emit('go-back')
     },
-    showReleveNotes(semestre) {
-      this.$emit('show-releve', this.etudiant, semestre)
+    showReleveNotes(semestre, parcours = null) {
+      this.$emit('show-releve', this.etudiantInfo, semestre, parcours)
     },
     showNotesAnnee(annee) {
-      this.$emit('show-notes-annee', this.etudiant, annee)
+      this.$emit('show-notes-annee', this.etudiantInfo, annee)
     }
   }
 }
@@ -40,11 +43,11 @@ export default {
       <h2>Informations de l'Étudiant</h2>
     </div>
 
-    <div class="student-card">
+    <div v-if="etudiantInfo" class="student-card">
       <div class="student-identity">
-        <h3>{{ etudiant.nom }} {{ etudiant.prenom }}</h3>
-        <p><strong>Matricule:</strong> {{ etudiant.matricule }}</p>
-        <p><strong>ID:</strong> {{ etudiant.idEtudiant }}</p>
+        <h3>{{ etudiantInfo.nom }} {{ etudiantInfo.prenom }}</h3>
+        <p><strong>Matricule:</strong> {{ etudiantInfo.matricule }}</p>
+        <p><strong>ID:</strong> {{ etudiantInfo.idEtudiant }}</p>
       </div>
 
       <div class="annees-section">
@@ -60,27 +63,24 @@ export default {
         <div class="moyennes-grid">
           <div class="moyenne-card" @click="showReleveNotes('S1')">
             <h4>Semestre 1</h4>
-            <div class="moyenne-value">{{ etudiant.moyenneS1 }}/20</div>
+            <div class="moyenne-value">{{ etudiantInfo.moyenneS1 }}/20</div>
           </div>
           <div class="moyenne-card" @click="showReleveNotes('S2')">
             <h4>Semestre 2</h4>
-            <div class="moyenne-value">{{ etudiant.moyenneS2 }}/20</div>
+            <div class="moyenne-value">{{ etudiantInfo.moyenneS2 }}/20</div>
           </div>
           <div class="moyenne-card" @click="showReleveNotes('S3')">
             <h4>Semestre 3</h4>
-            <div class="moyenne-value">{{ etudiant.moyenneS3 }}/20</div>
+            <div class="moyenne-value">{{ etudiantInfo.moyenneS3 }}/20</div>
           </div>
-          <div class="moyenne-card" @click="showReleveNotes('S4Dev')">
-            <h4>S4 Développement</h4>
-            <div class="moyenne-value">{{ etudiant.moyenneS4Dev }}/20</div>
-          </div>
-          <div class="moyenne-card" @click="showReleveNotes('S4Web')">
-            <h4>S4 Web</h4>
-            <div class="moyenne-value">{{ etudiant.moyenneS4Web }}/20</div>
-          </div>
-          <div class="moyenne-card" @click="showReleveNotes('S4BDD')">
-            <h4>S4 Base de Données</h4>
-            <div class="moyenne-value">{{ etudiant.moyenneS4BDD }}/20</div>
+          <div 
+            v-for="(moyenne, parcours) in etudiantInfo.moyennesS4" 
+            :key="parcours"
+            class="moyenne-card" 
+            @click="showReleveNotes('S4', parcours)"
+          >
+            <h4>S4 {{ parcours }}</h4>
+            <div class="moyenne-value">{{ moyenne }}/20</div>
           </div>
         </div>
       </div>
@@ -89,6 +89,7 @@ export default {
 </template>
 
 <style scoped>
+/* Styles inchangés */
 .etudiant-info {
   padding: 20px;
   max-width: 1000px;
@@ -115,16 +116,17 @@ export default {
 }
 
 .header h2 {
-  color: #2c3e50;
+  color: white;
   border-bottom: 2px solid #3498db;
   padding-bottom: 10px;
 }
 
 .student-card {
-  background: white;
+  background: #2d2d2d;
   border-radius: 10px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
   overflow: hidden;
+  border: 1px solid #444;
 }
 
 .student-identity {
@@ -146,12 +148,12 @@ export default {
 
 .annees-section {
   padding: 20px;
-  background: #f8f9fa;
-  border-bottom: 1px solid #e9ecef;
+  background: #252525;
+  border-bottom: 1px solid #444;
 }
 
 .annees-section h3 {
-  color: #2c3e50;
+  color: white;
   margin-bottom: 15px;
   text-align: center;
 }
@@ -184,7 +186,7 @@ export default {
 }
 
 .moyennes-section h3 {
-  color: #2c3e50;
+  color: white;
   margin-bottom: 20px;
   text-align: center;
   font-size: 1.5em;
@@ -197,8 +199,8 @@ export default {
 }
 
 .moyenne-card {
-  background: #f8f9fa;
-  border: 2px solid #e9ecef;
+  background: #252525;
+  border: 2px solid #444;
   border-radius: 10px;
   padding: 20px;
   text-align: center;
@@ -214,7 +216,7 @@ export default {
 
 .moyenne-card h4 {
   margin: 0 0 15px 0;
-  color: #2c3e50;
+  color: white;
   font-size: 1.1em;
 }
 
@@ -222,7 +224,7 @@ export default {
   font-size: 1.5em;
   font-weight: bold;
   color: #27ae60;
-  background: white;
+  background: #1a1a1a;
   padding: 10px;
   border-radius: 8px;
   border: 2px solid #27ae60;

@@ -2,75 +2,26 @@
 <script>
 export default {
   name: 'NotesAnnee',
+  props: ['selectedStudent', 'selectedAnnee', 'fetchData'],
   data() {
     return {
-      notesAnnee: [
-        {
-          idEtudiant: 1,
-          matricule: "ET001",
-          nom: "Dupont",
-          prenom: "Jean",
-          anneeUniversitaire: "2023-2024",
-          semestre: "S1",
-          notes: [
-            {
-              ue: "INF101",
-              intitule: "Algorithmique et Programmation",
-              credit: 6,
-              note: 15.5,
-              isOption: false
-            },
-            {
-              ue: "INF102", 
-              intitule: "Base de Données",
-              credit: 6,
-              note: 14.0,
-              isOption: false
-            },
-            {
-              ue: "MAT101",
-              intitule: "Mathématiques pour l'Informatique",
-              credit: 6,
-              note: 16.0,
-              isOption: false
-            }
-          ]
-        },
-        {
-          idEtudiant: 1,
-          matricule: "ET001",
-          nom: "Dupont",
-          prenom: "Jean",
-          anneeUniversitaire: "2023-2024",
-          semestre: "S2",
-          notes: [
-            {
-              ue: "INF201",
-              intitule: "Programmation Avancée",
-              credit: 6,
-              note: 15.0,
-              isOption: false
-            },
-            {
-              ue: "INF202", 
-              intitule: "Réseaux",
-              credit: 6,
-              note: 13.5,
-              isOption: false
-            },
-            {
-              ue: "MAT201",
-              intitule: "Statistiques",
-              credit: 6,
-              note: 14.5,
-              isOption: false
-            }
-          ]
-        }
-      ]
+      notesAnnee: []
+    }
+  },
+  async mounted() {
+    if (this.selectedStudent && this.selectedAnnee) {
+      await this.loadNotesAnnee()
     }
   },
   methods: {
+    async loadNotesAnnee() {
+      const data = await this.fetchData(
+        `http://localhost:8080/api/notes/etudiants/${this.selectedStudent.idEtudiant}/annee/${this.selectedAnnee}`
+      )
+      if (data) {
+        this.notesAnnee = data
+      }
+    },
     goBack() {
       this.$emit('go-back')
     }
@@ -83,10 +34,10 @@ export default {
     <button @click="goBack" class="back-btn">← Retour aux informations</button>
     
     <div class="header">
-      <h2>Notes - {{ notesAnnee[0].anneeUniversitaire }}</h2>
+      <h2>Notes - {{ selectedAnnee }}</h2>
     </div>
 
-    <div class="student-info">
+    <div v-if="notesAnnee.length > 0" class="student-info">
       <p><strong>Matricule:</strong> {{ notesAnnee[0].matricule }}</p>
       <p><strong>Nom:</strong> {{ notesAnnee[0].nom }} {{ notesAnnee[0].prenom }}</p>
       <p><strong>Année Universitaire:</strong> {{ notesAnnee[0].anneeUniversitaire }}</p>
@@ -96,30 +47,36 @@ export default {
       <div v-for="semestre in notesAnnee" :key="semestre.semestre" class="semestre-section">
         <h3 class="semestre-title">Semestre {{ semestre.semestre }}</h3>
         
-        <div class="notes-table">
-          <table>
-            <thead>
-              <tr>
-                <th>Code UE</th>
-                <th>Intitulé</th>
-                <th>Crédits</th>
-                <th>Note</th>
-                <th>Type</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="note in semestre.notes" :key="note.ue" :class="{ 'option-ue': note.isOption }">
-                <td>{{ note.ue }}</td>
-                <td>{{ note.intitule }}</td>
-                <td>{{ note.credit }}</td>
-                <td>{{ note.note }}/20</td>
-                <td>
-                  <span v-if="note.isOption" class="option-badge">Option</span>
-                  <span v-else class="obligatoire-badge">Obligatoire</span>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+        <div v-for="(notes, parcours) in semestre.notesParParcours" :key="parcours" class="parcours-section">
+          <h4 v-if="Object.keys(semestre.notesParParcours).length > 1" class="parcours-title">
+            Parcours: {{ parcours }}
+          </h4>
+          
+          <div class="notes-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>Code UE</th>
+                  <th>Intitulé</th>
+                  <th>Crédits</th>
+                  <th>Note</th>
+                  <th>Type</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="note in notes" :key="note.ue" :class="{ 'option-ue': note.isOption }">
+                  <td>{{ note.ue }}</td>
+                  <td>{{ note.intitule }}</td>
+                  <td>{{ note.credit }}</td>
+                  <td>{{ note.note }}/20</td>
+                  <td>
+                    <span v-if="note.isOption" class="option-badge">Option</span>
+                    <span v-else class="obligatoire-badge">Obligatoire</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
@@ -153,16 +110,17 @@ export default {
 }
 
 .header h2 {
-  color: #2c3e50;
+  color: white;
   border-bottom: 2px solid #9b59b6;
   padding-bottom: 10px;
 }
 
 .student-info {
-  background: #f8f9fa;
+  background: #252525;
   padding: 20px;
   border-radius: 8px;
   margin-bottom: 30px;
+  border: 1px solid #444;
 }
 
 .student-info p {
@@ -177,10 +135,11 @@ export default {
 }
 
 .semestre-section {
-  background: white;
+  background: #2d2d2d;
   border-radius: 10px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
   overflow: hidden;
+  border: 1px solid #444;
 }
 
 .semestre-title {
@@ -191,18 +150,30 @@ export default {
   font-size: 1.3em;
 }
 
-.notes-table {
+.parcours-section {
   padding: 20px;
+}
+
+.parcours-title {
+  color: #bdc3c7;
+  margin-bottom: 15px;
+  font-size: 1.1em;
+  border-bottom: 1px solid #444;
+  padding-bottom: 10px;
+}
+
+.notes-table {
+  margin-bottom: 20px;
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
-  background: white;
+  background: #252525;
 }
 
 th, td {
-  border: 1px solid #ddd;
+  border: 1px solid #444;
   padding: 12px;
   text-align: left;
 }
@@ -223,7 +194,7 @@ td:nth-child(4) {
 }
 
 .option-ue {
-  background-color: #fff8e1;
+  background-color: #3a2d39;
 }
 
 .option-badge {
@@ -245,10 +216,10 @@ td:nth-child(4) {
 }
 
 tr:nth-child(even):not(.option-ue) {
-  background: #f9f9f9;
+  background: #2d2d2d;
 }
 
 tr:hover {
-  background: #f5f5f5;
+  background: #333;
 }
 </style>

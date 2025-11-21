@@ -2,65 +2,31 @@
 <script>
 export default {
   name: 'ReleveNotes',
+  props: ['selectedStudent', 'selectedSemestre', 'selectedParcours', 'fetchData'],
   data() {
     return {
-      releve: {
-        idEtudiant: 1,
-        matricule: "ET001",
-        nom: "Dupont",
-        prenom: "Jean",
-        semestre: "S1",
-        parcours: "Informatique",
-        moyenne: 14.5,
-        totalCredits: 30,
-        notes: [
-          {
-            ue: "INF101",
-            intitule: "Algorithmique et Programmation",
-            credit: 6,
-            note: 15.5,
-            isOption: false
-          },
-          {
-            ue: "INF102", 
-            intitule: "Base de Données",
-            credit: 6,
-            note: 14.0,
-            isOption: false
-          },
-          {
-            ue: "INF103",
-            intitule: "Réseaux et Systèmes",
-            credit: 6,
-            note: 13.0,
-            isOption: false
-          },
-          {
-            ue: "MAT101",
-            intitule: "Mathématiques pour l'Informatique",
-            credit: 6,
-            note: 16.0,
-            isOption: false
-          },
-          {
-            ue: "ANG101",
-            intitule: "Anglais Technique",
-            credit: 3,
-            note: 12.5,
-            isOption: true
-          },
-          {
-            ue: "COM101",
-            intitule: "Communication",
-            credit: 3,
-            note: 15.0,
-            isOption: true
-          }
-        ]
-      }
+      releve: null
+    }
+  },
+  async mounted() {
+    if (this.selectedStudent && this.selectedSemestre) {
+      await this.loadReleve()
     }
   },
   methods: {
+    async loadReleve() {
+      let url = `http://localhost:8080/api/notes/etudiants/${this.selectedStudent.idEtudiant}/releve/${this.selectedSemestre}`
+      
+      // Ajouter le paramètre parcours pour S4
+      if (this.selectedSemestre === 'S4' && this.selectedParcours) {
+        url += `?parcours=${encodeURIComponent(this.selectedParcours)}`
+      }
+      
+      const data = await this.fetchData(url)
+      if (data) {
+        this.releve = data
+      }
+    },
     goBack() {
       this.$emit('go-back')
     }
@@ -70,52 +36,58 @@ export default {
 
 <template>
   <div class="releve-notes">
-    <button @click="goBack" class="back-btn">← Retour aux étudiants</button>
+    <button @click="goBack" class="back-btn">← Retour</button>
     
-    <div class="releve-header">
-      <h2>Relevé de Notes - {{ releve.semestre }}</h2>
-    </div>
+    <div v-if="releve" class="releve-content">
+      <div class="releve-header">
+        <h2>Relevé de Notes - {{ releve.semestre }}</h2>
+        <div v-if="selectedParcours" class="parcours-info">
+          Parcours: {{ selectedParcours }}
+        </div>
+      </div>
 
-    <div class="student-info">
-      <p><strong>Matricule:</strong> {{ releve.matricule }}</p>
-      <p><strong>Nom:</strong> {{ releve.nom }} {{ releve.prenom }}</p>
-      <p><strong>Parcours:</strong> {{ releve.parcours }}</p>
-    </div>
+      <div class="student-info">
+        <p><strong>Matricule:</strong> {{ releve.matricule }}</p>
+        <p><strong>Nom:</strong> {{ releve.nom }} {{ releve.prenom }}</p>
+        <p><strong>Parcours:</strong> {{ releve.parcours }}</p>
+      </div>
 
-    <div class="notes-table">
-      <table>
-        <thead>
-          <tr>
-            <th>Code UE</th>
-            <th>Intitulé</th>
-            <th>Crédits</th>
-            <th>Note</th>
-            <th>Type</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="note in releve.notes" :key="note.ue" :class="{ 'option-ue': note.isOption }">
-            <td>{{ note.ue }}</td>
-            <td>{{ note.intitule }}</td>
-            <td>{{ note.credit }}</td>
-            <td>{{ note.note }}/20</td>
-            <td>
-              <span v-if="note.isOption" class="option-badge">Option</span>
-              <span v-else class="obligatoire-badge">Obligatoire</span>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+      <div class="notes-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Code UE</th>
+              <th>Intitulé</th>
+              <th>Crédits</th>
+              <th>Note</th>
+              <th>Type</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="note in releve.notes" :key="note.ue" :class="{ 'option-ue': note.isOption }">
+              <td>{{ note.ue }}</td>
+              <td>{{ note.intitule }}</td>
+              <td>{{ note.credit }}</td>
+              <td>{{ note.note }}/20</td>
+              <td>
+                <span v-if="note.isOption" class="option-badge">Option</span>
+                <span v-else class="obligatoire-badge">Obligatoire</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
-    <div class="releve-summary">
-      <p><strong>Moyenne générale:</strong> {{ releve.moyenne }}/20</p>
-      <p><strong>Total crédits:</strong> {{ releve.totalCredits }}</p>
+      <div class="releve-summary">
+        <p><strong>Moyenne générale:</strong> {{ releve.moyenne }}/20</p>
+        <p><strong>Total crédits:</strong> {{ releve.totalCredits }}</p>
+      </div>
     </div>
   </div>
 </template>
 
 <style scoped>
+/* Styles inchangés */
 .releve-notes {
   padding: 20px;
   max-width: 900px;
@@ -142,16 +114,23 @@ export default {
 }
 
 .releve-header h2 {
-  color: #2c3e50;
+  color: white;
   border-bottom: 2px solid #3498db;
   padding-bottom: 10px;
 }
 
+.parcours-info {
+  margin-top: 10px;
+  font-style: italic;
+  color: #bdc3c7;
+}
+
 .student-info {
-  background: #f8f9fa;
+  background: #252525;
   padding: 20px;
   border-radius: 8px;
   margin-bottom: 20px;
+  border: 1px solid #444;
 }
 
 .student-info p {
@@ -166,18 +145,19 @@ export default {
 table {
   width: 100%;
   border-collapse: collapse;
-  background: white;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  background: #2d2d2d;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+  border: 1px solid #444;
 }
 
 th, td {
-  border: 1px solid #ddd;
+  border: 1px solid #444;
   padding: 12px;
   text-align: left;
 }
 
 th {
-  background: #3498db;
+  background: #404040;
   color: white;
   text-align: center;
 }
@@ -192,7 +172,7 @@ td:nth-child(4) {
 }
 
 .option-ue {
-  background-color: #fff8e1;
+  background-color: #3a2d39;
 }
 
 .option-badge {
@@ -214,18 +194,19 @@ td:nth-child(4) {
 }
 
 tr:nth-child(even):not(.option-ue) {
-  background: #f9f9f9;
+  background: #252525;
 }
 
 tr:hover {
-  background: #f5f5f5;
+  background: #333;
 }
 
 .releve-summary {
-  background: #ecf0f1;
+  background: #252525;
   padding: 20px;
   border-radius: 8px;
   text-align: center;
+  border: 1px solid #444;
 }
 
 .releve-summary p {

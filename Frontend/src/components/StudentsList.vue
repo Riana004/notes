@@ -2,43 +2,35 @@
 <script>
 export default {
   name: 'StudentsList',
-  props: ['selectedStudent', 'selectedSemestre'],
+  props: ['selectedStudent', 'selectedSemestre', 'fetchData'],
   data() {
     return {
-      students: [
-        {
-          idEtudiant: 1,
-          matricule: "ET001",
-          nom: "Dupont",
-          prenom: "Jean",
-          moyenneS1: 14.5,
-          moyenneS2: 15.2,
-          moyenneS3: 13.8,
-          moyenneS4Dev: 16.0,
-          moyenneS4Web: 14.5,
-          moyenneS4Bdd: 15.8
-        },
-        {
-          idEtudiant: 2,
-          matricule: "ET002", 
-          nom: "Martin",
-          prenom: "Marie",
-          moyenneS1: 12.8,
-          moyenneS2: 13.5,
-          moyenneS3: 14.2,
-          moyenneS4Dev: 13.0,
-          moyenneS4Web: 15.5,
-          moyenneS4Bdd: 12.8
-        }
-      ]
+      students: []
+    }
+  },
+  async mounted() {
+    await this.loadStudents()
+  },
+  computed: {
+    parcoursS4() {
+      if (this.students.length > 0 && this.students[0].moyennesS4) {
+        return Object.keys(this.students[0].moyennesS4)
+      }
+      return []
     }
   },
   methods: {
+    async loadStudents() {
+      const data = await this.fetchData('http://localhost:8080/api/notes/etudiants/moyennes')
+      if (data) {
+        this.students = data
+      }
+    },
     goBack() {
       this.$emit('go-back')
     },
-    showReleveNotes(student, semestre) {
-      this.$emit('show-releve', student, semestre)
+    showReleveNotes(student, semestre, parcours = null) {
+      this.$emit('show-releve', student, semestre, parcours)
     },
     showEtudiantInfo(student) {
       this.$emit('show-etudiant-info', student)
@@ -63,9 +55,9 @@ export default {
             <th>Moyenne S1</th>
             <th>Moyenne S2</th>
             <th>Moyenne S3</th>
-            <th>Moyenne S4 Dev</th>
-            <th>Moyenne S4 Web</th>
-            <th>Moyenne S4 BDD</th>
+            <th v-for="parcours in parcoursS4" :key="parcours">
+              S4 {{ parcours }}
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -84,14 +76,13 @@ export default {
             <td class="moyenne-cell" @click="showReleveNotes(student, 'S3')">
               {{ student.moyenneS3 }}
             </td>
-            <td class="moyenne-cell" @click="showReleveNotes(student, 'S4Dev')">
-              {{ student.moyenneS4Dev }}
-            </td>
-            <td class="moyenne-cell" @click="showReleveNotes(student, 'S4Web')">
-              {{ student.moyenneS4Web }}
-            </td>
-            <td class="moyenne-cell" @click="showReleveNotes(student, 'S4Bdd')">
-              {{ student.moyenneS4Bdd }}
+            <td 
+              v-for="parcours in parcoursS4" 
+              :key="parcours"
+              class="moyenne-cell" 
+              @click="showReleveNotes(student, 'S4', parcours)"
+            >
+              {{ student.moyennesS4[parcours] }}
             </td>
           </tr>
         </tbody>
@@ -101,6 +92,7 @@ export default {
 </template>
 
 <style scoped>
+/* Styles inchangés */
 .students-list {
   padding: 20px;
 }

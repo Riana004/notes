@@ -2,17 +2,22 @@
 <script>
 export default {
   name: 'SemesterList',
+  props: ['fetchData'],
   data() {
     return {
-      semesters: [
-        { idSemestre: 1, libellle: "Semestre 1" },
-        { idSemestre: 2, libellle: "Semestre 2" },
-        { idSemestre: 3, libellle: "Semestre 3" },
-        { idSemestre: 4, libellle: "Semestre 4" }
-      ]
+      semesters: []
     }
   },
+  async mounted() {
+    await this.loadSemesters()
+  },
   methods: {
+    async loadSemesters() {
+      const data = await this.fetchData('http://localhost:8080/api/notes/semestres')
+      if (data) {
+        this.semesters = data
+      }
+    },
     showStudents() {
       this.$emit('show-students')
     }
@@ -44,6 +49,7 @@ export default {
 <style scoped>
 .semester-list {
   padding: 20px;
+  text-align: center;
 }
 
 .semesters-grid {
@@ -54,8 +60,8 @@ export default {
 }
 
 .semester-card {
-  background: none;
-  border: 1px solid #ddd;
+  background: #2d2d2d;
+  border: 1px solid #444;
   border-radius: 8px;
   padding: 20px;
   text-align: center;

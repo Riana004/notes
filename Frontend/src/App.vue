@@ -7,6 +7,8 @@ import EtudiantInfo from './components/EtudiantInfo.vue'
 import NotesAnnee from './components/NotesAnnee.vue'
 import HomePage from './components/HomePage.vue'
 
+const API_BASE = 'http://localhost:8080/api/notes'
+
 export default {
   name: 'App',
   components: {
@@ -22,39 +24,67 @@ export default {
       currentView: 'HomePage',
       selectedStudent: null,
       selectedSemestre: null,
-      selectedAnnee: null
+      selectedAnnee: null,
+      selectedParcours: null,
+      loading: false,
+      error: null
     }
   },
   methods: {
-    showSemesters() {
+    async showSemesters() {
       this.currentView = 'SemesterList'
       this.clearSelectedData()
     },
-    showStudents() {
+    
+    async showStudents() {
       this.currentView = 'StudentsList'
     },
-    showReleve(student, semestre) {
+    
+    async showReleve(student, semestre, parcours = null) {
       this.selectedStudent = student
       this.selectedSemestre = semestre
+      this.selectedParcours = parcours
       this.currentView = 'ReleveNotes'
     },
-    showEtudiantInfo(student) {
+    
+    async showEtudiantInfo(student) {
       this.selectedStudent = student
       this.currentView = 'EtudiantInfo'
     },
-    showNotesAnnee(student, annee) {
+    
+    async showNotesAnnee(student, annee) {
       this.selectedStudent = student
       this.selectedAnnee = annee
       this.currentView = 'NotesAnnee'
     },
+    
     showHome() {
       this.currentView = 'HomePage'
       this.clearSelectedData()
     },
+    
     clearSelectedData() {
       this.selectedStudent = null
       this.selectedSemestre = null
       this.selectedAnnee = null
+      this.selectedParcours = null
+    },
+    
+    async fetchData(url) {
+      this.loading = true
+      this.error = null
+      try {
+        const response = await fetch(url)
+        if (!response.ok) throw new Error('Erreur API')
+        const data = await response.json()
+        return data.data // Extrait les données de ApiResponse
+      } catch (err) {
+        this.error = 'Erreur de chargement des données'
+        console.error(err)
+        return null
+      } finally {
+        this.loading = false
+      }
     }
   }
 }
@@ -67,11 +97,16 @@ export default {
     </div>
     
     <div class="main">
+      <div v-if="loading" class="loading">Chargement...</div>
+      <div v-else-if="error" class="error">{{ error }}</div>
       <component 
+        v-else
         :is="currentView" 
         :selectedStudent="selectedStudent"
         :selectedSemestre="selectedSemestre"
         :selectedAnnee="selectedAnnee"
+        :selectedParcours="selectedParcours"
+        :fetchData="fetchData"
         @show-students="showStudents"
         @show-releve="showReleve"
         @show-etudiant-info="showEtudiantInfo"
@@ -83,6 +118,7 @@ export default {
 </template>
 
 <style>
+/* Styles inchangés */
 * {
   margin: 0;
   padding: 0;
@@ -121,5 +157,15 @@ html, body {
 
 .main {
   padding: 20px;
+}
+
+.loading, .error {
+  text-align: center;
+  padding: 40px;
+  font-size: 1.2em;
+}
+
+.error {
+  color: #e74c3c;
 }
 </style>
