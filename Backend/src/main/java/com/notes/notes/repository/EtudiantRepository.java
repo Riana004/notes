@@ -8,5 +8,6 @@ import java.util.Optional;
 
 @Repository
 public interface EtudiantRepository extends JpaRepository<Etudiant, Long> {
-    Optional<Etudiant> findByEtu(String etu);
+    Optional<Etudiant> findByMatricule(String matricule);
 }
+
