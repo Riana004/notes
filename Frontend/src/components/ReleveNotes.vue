@@ -130,17 +130,21 @@ export default {
 }
 
 .back-btn {
-  background: #95a5a6;
+  background: var(--secondary-color);
   color: white;
   border: none;
   padding: 10px 20px;
-  border-radius: 5px;
+  border-radius: 6px;
   cursor: pointer;
   margin-bottom: 20px;
+  font-weight: 500;
+  transition: all 0.3s ease;
 }
 
 .back-btn:hover {
-  background: #7f8c8d;
+  background: var(--secondary-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(107, 114, 128, 0.3);
 }
 
 .releve-header {
@@ -149,28 +153,30 @@ export default {
 }
 
 .releve-header h2 {
-  color: white;
-  border-bottom: 2px solid #3498db;
+  color: var(--primary-color);
+  border-bottom: 2px solid var(--primary-color);
   padding-bottom: 10px;
 }
 
 .parcours-info {
   margin-top: 10px;
   font-style: italic;
-  color: #bdc3c7;
+  color: var(--text-secondary);
 }
 
 .student-info {
-  background: #252525;
+  background: white;
   padding: 20px;
   border-radius: 8px;
   margin-bottom: 20px;
-  border: 1px solid #444;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .student-info p {
   margin: 8px 0;
   font-size: 1.1em;
+  color: var(--text-primary);
 }
 
 .notes-table {
@@ -180,25 +186,27 @@ export default {
 table {
   width: 100%;
   border-collapse: collapse;
-  background: #2d2d2d;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-  border: 1px solid #444;
+  background: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--border-color);
 }
 
 th, td {
-  border: 1px solid #444;
+  border: 1px solid var(--border-color);
   padding: 12px;
   text-align: left;
 }
 
 th {
-  background: #404040;
+  background: var(--primary-color);
   color: white;
   text-align: center;
+  font-weight: 600;
 }
 
 td {
   text-align: left;
+  color: var(--text-primary);
 }
 
 td:nth-child(3),
@@ -207,7 +215,7 @@ td:nth-child(4) {
 }
 
 .option-ue {
-  background-color: #3a2d39;
+  background-color: #fef3c7;
 }
 
 .option-badge {
@@ -229,24 +237,26 @@ td:nth-child(4) {
 }
 
 tr:nth-child(even):not(.option-ue) {
-  background: #252525;
+  background: var(--light-bg);
 }
 
 tr:hover {
-  background: #333;
+  background: #f3f4f6;
 }
 
 .releve-summary {
-  background: #252525;
+  background: white;
   padding: 20px;
   border-radius: 8px;
   text-align: center;
-  border: 1px solid #444;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .releve-summary p {
   margin: 10px 0;
   font-size: 1.2em;
   font-weight: bold;
+  color: var(--text-primary);
 }
 </style>

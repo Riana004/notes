@@ -145,17 +145,19 @@ export default {
 }
 
 .header h2 {
-  color: white;
-  border-bottom: 2px solid #9b59b6;
+  color: var(--primary-color);
+  border-bottom: 2px solid var(--primary-color);
   padding-bottom: 10px;
+  font-weight: 700;
 }
 
 .student-info {
-  background: #252525;
+  background: white;
   padding: 20px;
   border-radius: 8px;
   margin-bottom: 30px;
-  border: 1px solid #444;
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
 }
 
 .student-info p {
@@ -170,11 +172,11 @@ export default {
 }
 
 .semestre-section {
-  background: #2d2d2d;
+  background: white;
   border-radius: 10px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+  box-shadow: var(--shadow-md);
   overflow: hidden;
-  border: 1px solid #444;
+  border: 1px solid var(--border-color);
 }
 
 .semestre-title {
@@ -190,11 +192,12 @@ export default {
 }
 
 .parcours-title {
-  color: #bdc3c7;
+  color: var(--text-primary);
   margin-bottom: 15px;
   font-size: 1.1em;
-  border-bottom: 1px solid #444;
+  border-bottom: 2px solid var(--border-color);
   padding-bottom: 10px;
+  font-weight: 600;
 }
 
 .notes-table {
@@ -204,13 +207,14 @@ export default {
 table {
   width: 100%;
   border-collapse: collapse;
-  background: #252525;
+  background: white;
 }
 
 th, td {
-  border: 1px solid #444;
+  border: 1px solid var(--border-color);
   padding: 12px;
   text-align: left;
+  color: var(--text-primary);
 }
 
 th {
@@ -229,7 +233,7 @@ td:nth-child(4) {
 }
 
 .option-ue {
-  background-color: #3a2d39;
+  background-color: #fef3c7;
 }
 
 .option-badge {
@@ -251,10 +255,10 @@ td:nth-child(4) {
 }
 
 tr:nth-child(even):not(.option-ue) {
-  background: #2d2d2d;
+  background: var(--light-bg);
 }
 
 tr:hover {
-  background: #333;
+  background: #f3f4f6;
 }
 </style>

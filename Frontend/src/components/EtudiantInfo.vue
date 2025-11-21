@@ -130,17 +130,21 @@ export default {
 }
 
 .back-btn {
-  background: #95a5a6;
+  background: var(--secondary-color);
   color: white;
   border: none;
   padding: 10px 20px;
-  border-radius: 5px;
+  border-radius: 6px;
   cursor: pointer;
   margin-bottom: 20px;
+  font-weight: 500;
+  transition: all 0.3s ease;
 }
 
 .back-btn:hover {
-  background: #7f8c8d;
+  background: var(--secondary-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(107, 114, 128, 0.3);
 }
 
 .header {
@@ -149,17 +153,17 @@ export default {
 }
 
 .header h2 {
-  color: white;
-  border-bottom: 2px solid #3498db;
+  color: var(--primary-color);
+  border-bottom: 2px solid var(--primary-color);
   padding-bottom: 10px;
 }
 
 .student-card {
-  background: #2d2d2d;
+  background: white;
   border-radius: 10px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   overflow: hidden;
-  border: 1px solid #444;
+  border: 1px solid var(--border-color);
 }
 
 .student-identity {
@@ -181,12 +185,12 @@ export default {
 
 .annees-section {
   padding: 20px;
-  background: #252525;
-  border-bottom: 1px solid #444;
+  background: var(--light-bg);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .annees-section h3 {
-  color: white;
+  color: var(--text-primary);
   margin-bottom: 15px;
   text-align: center;
 }
@@ -219,7 +223,7 @@ export default {
 }
 
 .moyennes-section h3 {
-  color: white;
+  color: var(--text-primary);
   margin-bottom: 20px;
   text-align: center;
   font-size: 1.5em;
@@ -232,34 +236,35 @@ export default {
 }
 
 .moyenne-card {
-  background: #252525;
-  border: 2px solid #444;
+  background: white;
+  border: 2px solid var(--border-color);
   border-radius: 10px;
   padding: 20px;
   text-align: center;
   cursor: pointer;
   transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .moyenne-card:hover {
   transform: translateY(-5px);
-  border-color: #3498db;
-  box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+  border-color: var(--primary-color);
+  box-shadow: 0 8px 16px rgba(79, 70, 229, 0.2);
 }
 
 .moyenne-card h4 {
   margin: 0 0 15px 0;
-  color: white;
+  color: var(--text-primary);
   font-size: 1.1em;
 }
 
 .moyenne-value {
   font-size: 1.5em;
   font-weight: bold;
-  color: #27ae60;
-  background: #1a1a1a;
+  color: #16a34a;
+  background: #f0fdf4;
   padding: 10px;
   border-radius: 8px;
-  border: 2px solid #27ae60;
+  border: 2px solid #16a34a;
 }
 </style>

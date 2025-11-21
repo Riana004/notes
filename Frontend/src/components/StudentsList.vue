@@ -71,124 +71,103 @@ export default {
 </script>
 
 <template>
-  <div class="students-list">
-    <button @click="goBack" class="back-btn">← Retour à l'accueil</button>
-    
-    <h2>Liste des Étudiants avec leurs Moyennes</h2>
-    
-    <div class="students-table">
-      <table>
-        <thead>
-          <tr>
-            <th>Matricule</th>
-            <th>Nom</th>
-            <th>Prénom</th>
-            <th>Moyenne S1</th>
-            <th>Moyenne S2</th>
-            <th>Moyenne S3</th>
-            <th v-for="parcours in parcoursS4" :key="parcours">
-              S4 {{ parcours }}
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="student in students" :key="student.idEtudiant">
-            <td class="matricule-cell" @click="showEtudiantInfo(student)">
-              {{ student.matricule }}
-            </td>
-            <td>{{ student.nom }}</td>
-            <td>{{ student.prenom }}</td>
-            <td class="moyenne-cell" @click="showReleveNotes(student, 'S1')">
-              {{ student.moyenneS1 }}
-            </td>
-            <td class="moyenne-cell" @click="showReleveNotes(student, 'S2')">
-              {{ student.moyenneS2 }}
-            </td>
-            <td class="moyenne-cell" @click="showReleveNotes(student, 'S3')">
-              {{ student.moyenneS3 }}
-            </td>
-            <td 
-              v-for="parcours in parcoursS4" 
-              :key="parcours"
-              class="moyenne-cell" 
-              @click="showReleveNotes(student, 'S4', parcours)"
-            >
-              {{ student.moyennesS4[parcours] }}
-            </td>
-          </tr>
-        </tbody>
-      </table>
+  <div class="fade-in">
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">📋 Liste des Étudiants</h2>
+        <p class="card-subtitle">Moyennes par semestre et parcours</p>
+      </div>
+
+      <div v-if="isFetching" class="loading-container">
+        <div class="spinner"></div>
+        <p class="text-secondary">Chargement des étudiants...</p>
+      </div>
+
+      <div v-else-if="error" class="alert alert-error">
+        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" width="20" height="20">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+        </svg>
+        <div>
+          <strong>Erreur de chargement</strong>
+          <p>{{ error }}</p>
+          <button @click="loadStudents" class="btn-primary mt-2">Réessayer</button>
+        </div>
+      </div>
+
+      <div v-else-if="students.length === 0" class="alert alert-warning">
+        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" width="20" height="20">
+          <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+        </svg>
+        <div>
+          <strong>Aucun étudiant</strong>
+          <p>Aucun étudiant trouvé dans la base de données.</p>
+        </div>
+      </div>
+
+      <div v-else class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Matricule</th>
+              <th>Nom</th>
+              <th>Prénom</th>
+              <th>Moyenne S1</th>
+              <th>Moyenne S2</th>
+              <th>Moyenne S3</th>
+              <th v-for="parcours in parcoursS4" :key="parcours">
+                S4 {{ parcours }}
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="student in students" :key="student.idEtudiant" class="clickable">
+              <td class="font-semibold text-primary" @click="showEtudiantInfo(student)">
+                {{ student.matricule }}
+              </td>
+              <td>{{ student.nom }}</td>
+              <td>{{ student.prenom }}</td>
+              <td @click="showReleveNotes(student, 'S1')" class="clickable text-center">
+                <span class="badge badge-primary">{{ student.moyenneS1 || 'N/A' }}</span>
+              </td>
+              <td @click="showReleveNotes(student, 'S2')" class="clickable text-center">
+                <span class="badge badge-primary">{{ student.moyenneS2 || 'N/A' }}</span>
+              </td>
+              <td @click="showReleveNotes(student, 'S3')" class="clickable text-center">
+                <span class="badge badge-primary">{{ student.moyenneS3 || 'N/A' }}</span>
+              </td>
+              <td 
+                v-for="parcours in parcoursS4" 
+                :key="parcours"
+                @click="showReleveNotes(student, 'S4', parcours)"
+                class="clickable text-center"
+              >
+                <span class="badge badge-success">
+                  {{ student.moyennesS4[parcours] || 'N/A' }}
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-/* Styles inchangés */
-.students-list {
-  padding: 20px;
-}
-
-.back-btn {
-  background: #95a5a6;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 5px;
-  cursor: pointer;
-  margin-bottom: 20px;
-}
-
-.back-btn:hover {
-  background: #7f8c8d;
-}
-
-.students-table {
+.table-container {
   overflow-x: auto;
 }
 
-table {
-  width: 100%;
-  border-collapse: collapse;
-  background: #2d2d2d;
-}
-
-th, td {
-  border: 1px solid #444;
-  padding: 12px;
-  text-align: center;
-}
-
-th {
-  background: #404040;
-  color: white;
-}
-
-.matricule-cell {
+.clickable {
   cursor: pointer;
-  background: #3a506b;
-  font-weight: bold;
-  color: white;
+  transition: all 0.2s ease;
 }
 
-.matricule-cell:hover {
-  background: #4a6080;
+.clickable:hover {
+  background-color: var(--light-bg);
 }
 
-.moyenne-cell {
-  cursor: pointer;
-  background: #34495e;
-  font-weight: bold;
-}
-
-.moyenne-cell:hover {
-  background: #415b76;
-}
-
-tr:nth-child(even) {
-  background: #252525;
-}
-
-tr:hover {
-  background: #333;
+td.clickable:hover {
+  transform: scale(1.05);
 }
 </style>

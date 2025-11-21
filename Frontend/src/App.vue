@@ -124,16 +124,35 @@ export default {
 
 <template>
   <div id="app">
-    <div class="header">
-      <button @click="showSemesters" class="semester-btn">Semestres</button>
-    </div>
+    <header class="app-header">
+      <h1>🎓 Gestion des Notes</h1>
+      <nav class="app-nav">
+        <button @click="showHome" class="btn-outline">🏠 Accueil</button>
+        <button @click="showSemesters" class="btn-primary">📚 Semestres</button>
+        <button @click="showStudents" class="btn-secondary">👥 Étudiants</button>
+      </nav>
+    </header>
     
-    <div class="main">
-      <div v-if="loading" class="loading">Chargement...</div>
-      <div v-else-if="error" class="error">{{ error }}</div>
+    <main class="p-4">
+      <div v-if="loading" class="loading-container">
+        <div class="spinner"></div>
+        <p class="text-secondary">Chargement en cours...</p>
+      </div>
+      
+      <div v-else-if="error" class="alert alert-error">
+        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" width="20" height="20">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+        </svg>
+        <div>
+          <strong>Erreur</strong>
+          <p>{{ error }}</p>
+        </div>
+      </div>
+      
       <keep-alive v-else>
         <component 
           :is="currentView"
+          :key="`${currentView}-${selectedStudent?.idEtudiant}-${selectedSemestre}-${selectedAnnee}-${selectedParcours}`"
           :selectedStudent="selectedStudent"
           :selectedSemestre="selectedSemestre"
           :selectedAnnee="selectedAnnee"
@@ -145,73 +164,6 @@ export default {
           @go-back="showHome"
         />
       </keep-alive>
-    </div>
+    </main>
   </div>
 </template>
-
-<style>
-/* Styles inchangés */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-html, body {
-  height: 100%;
-}
-
-#app {
-  min-height: 100vh;
-  font-family: system-ui, -apple-system, sans-serif;
-  background: #1a1a1a;
-  color: white;
-}
-
-.header {
-  padding: 15px 20px;
-  background: #2d2d2d;
-  border-bottom: 1px solid #444;
-}
-
-.semester-btn {
-  padding: 10px 20px;
-  background: #404040;
-  border: 1px solid #555;
-  color: white;
-  cursor: pointer;
-  border-radius: 4px;
-}
-
-.semester-btn:hover {
-  background: #505050;
-}
-
-.main {
-  padding: 20px;
-}
-
-.loading, .error {
-  text-align: center;
-  padding: 40px;
-  font-size: 1.2em;
-}
-
-.error {
-  color: #e74c3c;
-  background: #2d1f1f;
-  border: 1px solid #e74c3c;
-  border-radius: 8px;
-  margin: 20px auto;
-  max-width: 600px;
-  padding: 30px;
-  line-height: 1.6;
-}
-
-.error::before {
-  content: '⚠️ ';
-  font-size: 2em;
-  display: block;
-  margin-bottom: 10px;
-}
-</style>
