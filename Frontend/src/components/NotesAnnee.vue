@@ -1,0 +1,264 @@
+<!-- components/NotesAnnee.vue -->
+<script>
+import { API_ENDPOINTS } from '../config'
+
+export default {
+  name: 'NotesAnnee',
+  props: ['selectedStudent', 'selectedAnnee'],
+  data() {
+    return {
+      notesAnnee: [],
+      isLoaded: false,
+      isFetching: false,
+      loadedKey: null,
+      error: null
+    }
+  },
+  async mounted() {
+    console.log('NotesAnnee mounted for:', this.selectedAnnee)
+    if (this.selectedStudent && this.selectedAnnee) {
+      await this.loadNotesAnnee()
+    }
+  },
+  methods: {
+    async loadNotesAnnee() {
+      const key = `${this.selectedStudent.idEtudiant}-${this.selectedAnnee}`
+      
+      if ((this.isLoaded || this.isFetching) && this.loadedKey === key) {
+        console.log('NotesAnnee already loaded for this key')
+        return
+      }
+      
+      this.isFetching = true
+      this.error = null
+      const url = API_ENDPOINTS.notesAnnee(this.selectedStudent.idEtudiant, this.selectedAnnee)
+      console.log('Fetching notes annee from:', url)
+      
+      try {
+        const response = await fetch(url, {
+          headers: { 'Content-Type': 'application/json' }
+        })
+        
+        if (!response.ok) throw new Error(`HTTP ${response.status}`)
+        
+        const result = await response.json()
+        const data = result.data || result
+        
+        if (data) {
+          this.notesAnnee = data
+          this.isLoaded = true
+          this.loadedKey = key
+          console.log('Notes annee loaded')
+        }
+      } catch (err) {
+        this.error = err.message
+        console.error('Error loading notes annee:', err)
+      } finally {
+        this.isFetching = false
+      }
+    },
+    goBack() {
+      this.$emit('go-back')
+    }
+  }
+}
+</script>
+
+<template>
+  <div class="notes-annee">
+    <button @click="goBack" class="back-btn">← Retour aux informations</button>
+    
+    <div class="header">
+      <h2>Notes - {{ selectedAnnee }}</h2>
+    </div>
+
+    <div v-if="notesAnnee.length > 0" class="student-info">
+      <p><strong>Matricule:</strong> {{ notesAnnee[0].matricule }}</p>
+      <p><strong>Nom:</strong> {{ notesAnnee[0].nom }} {{ notesAnnee[0].prenom }}</p>
+      <p><strong>Année Universitaire:</strong> {{ notesAnnee[0].anneeUniversitaire }}</p>
+    </div>
+
+    <div class="semestres-container">
+      <div v-for="semestre in notesAnnee" :key="semestre.semestre" class="semestre-section">
+        <h3 class="semestre-title">Semestre {{ semestre.semestre }}</h3>
+        
+        <div v-for="(notes, parcours) in semestre.notesParParcours" :key="parcours" class="parcours-section">
+          <h4 v-if="Object.keys(semestre.notesParParcours).length > 1" class="parcours-title">
+            Parcours: {{ parcours }}
+          </h4>
+          
+          <div class="notes-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>Code UE</th>
+                  <th>Intitulé</th>
+                  <th>Crédits</th>
+                  <th>Note</th>
+                  <th>Type</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="note in notes" :key="note.ue" :class="{ 'option-ue': note.isOption }">
+                  <td>{{ note.ue }}</td>
+                  <td>{{ note.intitule }}</td>
+                  <td>{{ note.credit }}</td>
+                  <td>{{ note.note }}/20</td>
+                  <td>
+                    <span v-if="note.isOption" class="option-badge">Option</span>
+                    <span v-else class="obligatoire-badge">Obligatoire</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<style scoped>
+.notes-annee {
+  padding: 20px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.back-btn {
+  background: #95a5a6;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-bottom: 20px;
+}
+
+.back-btn:hover {
+  background: #7f8c8d;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.header h2 {
+  color: var(--primary-color);
+  border-bottom: 2px solid var(--primary-color);
+  padding-bottom: 10px;
+  font-weight: 700;
+}
+
+.student-info {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 30px;
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+}
+
+.student-info p {
+  margin: 8px 0;
+  font-size: 1.1em;
+}
+
+.semestres-container {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.semestre-section {
+  background: white;
+  border-radius: 10px;
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+}
+
+.semestre-title {
+  background: #9b59b6;
+  color: white;
+  margin: 0;
+  padding: 15px 20px;
+  font-size: 1.3em;
+}
+
+.parcours-section {
+  padding: 20px;
+}
+
+.parcours-title {
+  color: var(--text-primary);
+  margin-bottom: 15px;
+  font-size: 1.1em;
+  border-bottom: 2px solid var(--border-color);
+  padding-bottom: 10px;
+  font-weight: 600;
+}
+
+.notes-table {
+  margin-bottom: 20px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+}
+
+th, td {
+  border: 1px solid var(--border-color);
+  padding: 12px;
+  text-align: left;
+  color: var(--text-primary);
+}
+
+th {
+  background: #8e44ad;
+  color: white;
+  text-align: center;
+}
+
+td {
+  text-align: left;
+}
+
+td:nth-child(3),
+td:nth-child(4) {
+  text-align: center;
+}
+
+.option-ue {
+  background-color: #fef3c7;
+}
+
+.option-badge {
+  background: #ffa000;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.8em;
+  font-weight: bold;
+}
+
+.obligatoire-badge {
+  background: #4caf50;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.8em;
+  font-weight: bold;
+}
+
+tr:nth-child(even):not(.option-ue) {
+  background: var(--light-bg);
+}
+
+tr:hover {
+  background: #f3f4f6;
+}
+</style>

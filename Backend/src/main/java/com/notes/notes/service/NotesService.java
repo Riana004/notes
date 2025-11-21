@@ -82,6 +82,7 @@ public class NotesService {
 
         List<NoteDetailDTO> notes = new ArrayList<>();
         int totalCredits = 0;
+        int sommeCredits = 0; // Somme de tous les crédits
         BigDecimal sommeNotesPonderees = BigDecimal.ZERO;
 
         // Récupérer les matières du semestre en fonction du parcours
@@ -119,21 +120,25 @@ public class NotesService {
             if (optionGroup == 0) {
                 // Matières obligatoires
                 for (SemestreMatiereParcours smp : matieresGroup) {
-                    BigDecimal note = notesMap.get(smp.getMatiere().getIdMatiere());
-                    if (note != null) {
-                        NoteDetailDTO detail = new NoteDetailDTO();
-                        detail.setUe(smp.getMatiere().getUe());
-                        detail.setIntitule(smp.getMatiere().getIntitule());
-                        detail.setCredit(smp.getCredit());
-                        detail.setNote(note);
-                        detail.setIsOption(false);
-                        notes.add(detail);
+                    BigDecimal note = notesMap.getOrDefault(smp.getMatiere().getIdMatiere(), BigDecimal.ZERO);
+                    
+                    NoteDetailDTO detail = new NoteDetailDTO();
+                    detail.setUe(smp.getMatiere().getUe());
+                    detail.setIntitule(smp.getMatiere().getIntitule());
+                    detail.setCredit(smp.getCredit());
+                    detail.setNote(note);
+                    detail.setIsOption(false);
+                    notes.add(detail);
 
+                    // Compter tous les crédits
+                    sommeCredits += smp.getCredit();
+                    // Compter les crédits seulement si note >= 6
+                    if (note.compareTo(new BigDecimal("6")) >= 0) {
                         totalCredits += smp.getCredit();
-                        sommeNotesPonderees = sommeNotesPonderees.add(
-                                note.multiply(BigDecimal.valueOf(smp.getCredit()))
-                        );
                     }
+                    sommeNotesPonderees = sommeNotesPonderees.add(
+                            note.multiply(BigDecimal.valueOf(smp.getCredit()))
+                    );
                 }
             } else {
                 // Matières optionnelles : prendre celle avec la meilleure note
@@ -141,11 +146,17 @@ public class NotesService {
                 BigDecimal meilleureNote = BigDecimal.ZERO;
                 
                 for (SemestreMatiereParcours smp : matieresGroup) {
-                    BigDecimal note = notesMap.get(smp.getMatiere().getIdMatiere());
-                    if (note != null && note.compareTo(meilleureNote) > 0) {
+                    BigDecimal note = notesMap.getOrDefault(smp.getMatiere().getIdMatiere(), BigDecimal.ZERO);
+                    if (note.compareTo(meilleureNote) > 0) {
                         meilleureNote = note;
                         meilleureOption = smp;
                     }
+                }
+
+                // Si aucune note n'est trouvée, prendre la première matière du groupe
+                if (meilleureOption == null && !matieresGroup.isEmpty()) {
+                    meilleureOption = matieresGroup.get(0);
+                    meilleureNote = BigDecimal.ZERO;
                 }
 
                 if (meilleureOption != null) {
@@ -157,7 +168,12 @@ public class NotesService {
                     detail.setIsOption(true);
                     notes.add(detail);
 
-                    totalCredits += meilleureOption.getCredit();
+                    // Compter tous les crédits
+                    sommeCredits += meilleureOption.getCredit();
+                    // Compter les crédits seulement si note >= 6
+                    if (meilleureNote.compareTo(new BigDecimal("6")) >= 0) {
+                        totalCredits += meilleureOption.getCredit();
+                    }
                     sommeNotesPonderees = sommeNotesPonderees.add(
                             meilleureNote.multiply(BigDecimal.valueOf(meilleureOption.getCredit()))
                     );
@@ -167,8 +183,8 @@ public class NotesService {
 
         releve.setNotes(notes);
         releve.setTotalCredits(totalCredits);
-        releve.setMoyenne(totalCredits > 0 
-                ? sommeNotesPonderees.divide(BigDecimal.valueOf(totalCredits), 2, RoundingMode.HALF_UP)
+        releve.setMoyenne(sommeCredits > 0 
+                ? sommeNotesPonderees.divide(BigDecimal.valueOf(sommeCredits), 2, RoundingMode.HALF_UP)
                 : BigDecimal.ZERO);
 
         return releve;

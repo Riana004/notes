@@ -132,7 +132,7 @@ INSERT INTO SemestreMatiereParcours (credit, option, id_semestre, id_matiere, id
   (6, 1, (SELECT id_semestre FROM Semestre WHERE libellle = 'S4'), (SELECT id_matiere FROM Matiere WHERE ue = 'INF204'), (SELECT id_parcours FROM Parcours WHERE intitule = 'Web et Design')),  
   (6, 1, (SELECT id_semestre FROM Semestre WHERE libellle = 'S4'), (SELECT id_matiere FROM Matiere WHERE ue = 'INF205'), (SELECT id_parcours FROM Parcours WHERE intitule = 'Web et Design')),  
   (6, 1, (SELECT id_semestre FROM Semestre WHERE libellle = 'S4'), (SELECT id_matiere FROM Matiere WHERE ue = 'INF206'), (SELECT id_parcours FROM Parcours WHERE intitule = 'Web et Design')),  
-  (6, 1, (SELECT id_semestre FROM Semestre WHERE libellle = 'S4'), (SELECT id_matiere FROM Matiere WHERE ue = 'INF209'), (SELECT id_parcours FROM Parcours WHERE intitule = 'Web et Design')),  
+  (6, 0, (SELECT id_semestre FROM Semestre WHERE libellle = 'S4'), (SELECT id_matiere FROM Matiere WHERE ue = 'INF209'), (SELECT id_parcours FROM Parcours WHERE intitule = 'Web et Design')),  
   (10, 0, (SELECT id_semestre FROM Semestre WHERE libellle = 'S4'), (SELECT id_matiere FROM Matiere WHERE ue = 'INF212'), (SELECT id_parcours FROM Parcours WHERE intitule = 'Web et Design')),  
   (4, 2, (SELECT id_semestre FROM Semestre WHERE libellle = 'S4'), (SELECT id_matiere FROM Matiere WHERE ue = 'MTH202'), (SELECT id_parcours FROM Parcours WHERE intitule = 'Web et Design')),  
   (4, 2, (SELECT id_semestre FROM Semestre WHERE libellle = 'S4'), (SELECT id_matiere FROM Matiere WHERE ue = 'MTH204'), (SELECT id_parcours FROM Parcours WHERE intitule = 'Web et Design')),  

@@ -1,0 +1,270 @@
+<!-- components/EtudiantInfo.vue -->
+<script>
+import { API_ENDPOINTS } from '../config'
+
+export default {
+  name: 'EtudiantInfo',
+  props: ['selectedStudent'],
+  data() {
+    return {
+      etudiantInfo: null,
+      isLoaded: false,
+      isFetching: false,
+      loadedStudentId: null,
+      error: null
+    }
+  },
+  async mounted() {
+    console.log('EtudiantInfo mounted for student:', this.selectedStudent)
+    if (this.selectedStudent) {
+      await this.loadEtudiantInfo()
+    }
+  },
+  methods: {
+    async loadEtudiantInfo() {
+      if ((this.isLoaded || this.isFetching) && this.loadedStudentId === this.selectedStudent.idEtudiant) {
+        console.log('EtudiantInfo already loaded for this student')
+        return
+      }
+      
+      this.isFetching = true
+      this.error = null
+      const url = API_ENDPOINTS.etudiantInfo(this.selectedStudent.idEtudiant)
+      console.log('Fetching etudiant info from:', url)
+      
+      try {
+        const response = await fetch(url, {
+          headers: { 'Content-Type': 'application/json' }
+        })
+        
+        if (!response.ok) throw new Error(`HTTP ${response.status}`)
+        
+        const result = await response.json()
+        const data = result.data || result
+        
+        if (data) {
+          this.etudiantInfo = data
+          this.isLoaded = true
+          this.loadedStudentId = this.selectedStudent.idEtudiant
+          console.log('Etudiant info loaded')
+        }
+      } catch (err) {
+        this.error = err.message
+        console.error('Error loading etudiant info:', err)
+      } finally {
+        this.isFetching = false
+      }
+    },
+    goBack() {
+      this.$emit('go-back')
+    },
+    showReleveNotes(semestre, parcours = null) {
+      this.$emit('show-releve', this.etudiantInfo, semestre, parcours)
+    },
+    showNotesAnnee(annee) {
+      this.$emit('show-notes-annee', this.etudiantInfo, annee)
+    }
+  }
+}
+</script>
+
+<template>
+  <div class="etudiant-info">
+    <button @click="goBack" class="back-btn">← Retour aux étudiants</button>
+    
+    <div class="header">
+      <h2>Informations de l'Étudiant</h2>
+    </div>
+
+    <div v-if="etudiantInfo" class="student-card">
+      <div class="student-identity">
+        <h3>{{ etudiantInfo.nom }} {{ etudiantInfo.prenom }}</h3>
+        <p><strong>Matricule:</strong> {{ etudiantInfo.matricule }}</p>
+        <p><strong>ID:</strong> {{ etudiantInfo.idEtudiant }}</p>
+      </div>
+
+      <div class="annees-section">
+        <h3>Notes par Année Universitaire</h3>
+        <div class="annees-links">
+          <button @click="showNotesAnnee('L1')" class="annee-btn">L1</button>
+          <button @click="showNotesAnnee('L2')" class="annee-btn">L2</button>
+        </div>
+      </div>
+
+      <div class="moyennes-section">
+        <h3>Moyennes par Semestre</h3>
+        <div class="moyennes-grid">
+          <div class="moyenne-card" @click="showReleveNotes('S1')">
+            <h4>Semestre 1</h4>
+            <div class="moyenne-value">{{ etudiantInfo.moyenneS1 }}/20</div>
+          </div>
+          <div class="moyenne-card" @click="showReleveNotes('S2')">
+            <h4>Semestre 2</h4>
+            <div class="moyenne-value">{{ etudiantInfo.moyenneS2 }}/20</div>
+          </div>
+          <div class="moyenne-card" @click="showReleveNotes('S3')">
+            <h4>Semestre 3</h4>
+            <div class="moyenne-value">{{ etudiantInfo.moyenneS3 }}/20</div>
+          </div>
+          <div 
+            v-for="(moyenne, parcours) in etudiantInfo.moyennesS4" 
+            :key="parcours"
+            class="moyenne-card" 
+            @click="showReleveNotes('S4', parcours)"
+          >
+            <h4>S4 {{ parcours }}</h4>
+            <div class="moyenne-value">{{ moyenne }}/20</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<style scoped>
+/* Styles inchangés */
+.etudiant-info {
+  padding: 20px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.back-btn {
+  background: var(--secondary-color);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-bottom: 20px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.back-btn:hover {
+  background: var(--secondary-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(107, 114, 128, 0.3);
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.header h2 {
+  color: var(--primary-color);
+  border-bottom: 2px solid var(--primary-color);
+  padding-bottom: 10px;
+}
+
+.student-card {
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+}
+
+.student-identity {
+  background: #3498db;
+  color: white;
+  padding: 30px;
+  text-align: center;
+}
+
+.student-identity h3 {
+  margin: 0 0 15px 0;
+  font-size: 1.8em;
+}
+
+.student-identity p {
+  margin: 8px 0;
+  font-size: 1.1em;
+}
+
+.annees-section {
+  padding: 20px;
+  background: var(--light-bg);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.annees-section h3 {
+  color: var(--text-primary);
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.annees-links {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.annee-btn {
+  background: #9b59b6;
+  color: white;
+  border: none;
+  padding: 12px 30px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1.1em;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.annee-btn:hover {
+  background: #8e44ad;
+  transform: translateY(-2px);
+}
+
+.moyennes-section {
+  padding: 30px;
+}
+
+.moyennes-section h3 {
+  color: var(--text-primary);
+  margin-bottom: 20px;
+  text-align: center;
+  font-size: 1.5em;
+}
+
+.moyennes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.moyenne-card {
+  background: white;
+  border: 2px solid var(--border-color);
+  border-radius: 10px;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.moyenne-card:hover {
+  transform: translateY(-5px);
+  border-color: var(--primary-color);
+  box-shadow: 0 8px 16px rgba(79, 70, 229, 0.2);
+}
+
+.moyenne-card h4 {
+  margin: 0 0 15px 0;
+  color: var(--text-primary);
+  font-size: 1.1em;
+}
+
+.moyenne-value {
+  font-size: 1.5em;
+  font-weight: bold;
+  color: #16a34a;
+  background: #f0fdf4;
+  padding: 10px;
+  border-radius: 8px;
+  border: 2px solid #16a34a;
+}
+</style>
