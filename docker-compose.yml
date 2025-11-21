@@ -33,5 +33,20 @@ services:
       postgres:
         condition: service_healthy
 
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: notes-frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      VUE_APP_API_URL: http://springboot-app:8080
+    depends_on:
+      - springboot-app
+
 volumes:
   postgres_data:
