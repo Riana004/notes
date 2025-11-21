@@ -18,10 +18,10 @@ INSERT INTO AnneeUniversitaire (intitule) VALUES
 -- Lier Semestres et Années  
 -- Exemple : S1, S2, S3, S4 dans l’année 2025-2026  
 INSERT INTO AnneeSemestre (id_semestre, id_annee_universitaire) VALUES  
-  ((SELECT id_semestre FROM Semestre WHERE libellle = 'S1'), (SELECT id_annee_universitaire FROM AnneeUniversitaire WHERE intitule = '2025-2026')),  
-  ((SELECT id_semestre FROM Semestre WHERE libellle = 'S2'), (SELECT id_annee_universitaire FROM AnneeUniversitaire WHERE intitule = '2025-2026')),  
-  ((SELECT id_semestre FROM Semestre WHERE libellle = 'S3'), (SELECT id_annee_universitaire FROM AnneeUniversitaire WHERE intitule = '2025-2026')),  
-  ((SELECT id_semestre FROM Semestre WHERE libellle = 'S4'), (SELECT id_annee_universitaire FROM AnneeUniversitaire WHERE intitule = '2025-2026'));
+  ((SELECT id_semestre FROM Semestre WHERE libellle = 'S1'), (SELECT id_annee_universitaire FROM AnneeUniversitaire WHERE intitule = 'L1')),  
+  ((SELECT id_semestre FROM Semestre WHERE libellle = 'S2'), (SELECT id_annee_universitaire FROM AnneeUniversitaire WHERE intitule = 'L1')),  
+  ((SELECT id_semestre FROM Semestre WHERE libellle = 'S3'), (SELECT id_annee_universitaire FROM AnneeUniversitaire WHERE intitule = 'L2')),  
+  ((SELECT id_semestre FROM Semestre WHERE libellle = 'S4'), (SELECT id_annee_universitaire FROM AnneeUniversitaire WHERE intitule = 'L2'));
 
 -- Matières (UE) pour S1 à S4  
 INSERT INTO Matiere (ue, intitule) VALUES  
