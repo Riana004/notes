@@ -16,21 +16,18 @@ public class Matiere {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "id_matiere")
+    private Long idMatiere;
     
-    @ManyToOne
-    @JoinColumn(name = "id_semestre", nullable = false)
-    private Semestre semestre;
+    @Column(nullable = false, unique = true, length = 50)
+    private String ue;
     
     @Column(nullable = false, length = 50)
-    private String code;
-    
-    @Column(nullable = false, length = 150)
     private String intitule;
     
-    @Column(nullable = false)
-    private Integer credit;
+    @OneToMany(mappedBy = "matiere")
+    private List<SemestreMatiereParcours> semestreMatieresParcours;
     
     @OneToMany(mappedBy = "matiere")
-    private List<Note> notes;
+    private List<Examen> examens;
 }

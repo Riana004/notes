@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 @Entity
-@Table(name = "annee_universitaire")
+@Table(name = "anneeuniversitaire")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -16,16 +16,13 @@ public class AnneeUniversitaire {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "id_annee_universitaire")
+    private Long idAnneeUniversitaire;
     
-    @Column(name = "annee_debut", nullable = false)
-    private Integer anneeDebut;
-    
-    @Column(name = "annee_fin", nullable = false)
-    private Integer anneeFin;
+    @Column(nullable = false, length = 50)
+    private String intitule;
     
     @OneToMany(mappedBy = "anneeUniversitaire")
-    private List<Session> sessions;
-
-
+    private List<AnneeSemestre> anneeSemestres;
 }
+

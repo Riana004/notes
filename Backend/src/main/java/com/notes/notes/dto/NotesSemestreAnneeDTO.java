@@ -1,0 +1,20 @@
+package com.notes.notes.dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.List;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class NotesSemestreAnneeDTO {
+    private Long idEtudiant;
+    private String matricule;
+    private String nom;
+    private String prenom;
+    private String anneeUniversitaire;
+    private String semestre;
+    private List<NoteDetailDTO> notes;
+}

@@ -16,15 +16,18 @@ public class Semestre {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "id_semestre")
+    private Long idSemestre;
     
-    @ManyToOne
-    @JoinColumn(name = "id_annee_etude", nullable = false)
-    private AnneeEtude anneeEtude;
-    
-    @Column(nullable = false, length = 100)
-    private String nom;
+    @Column(nullable = false, length = 50)
+    private String libellle;
     
     @OneToMany(mappedBy = "semestre")
-    private List<Matiere> matieres;
+    private List<InscriptionSemestre> inscriptions;
+    
+    @OneToMany(mappedBy = "semestre")
+    private List<AnneeSemestre> anneeSemestres;
+    
+    @OneToMany(mappedBy = "semestre")
+    private List<SemestreMatiereParcours> semestreMatieresParcours;
 }
