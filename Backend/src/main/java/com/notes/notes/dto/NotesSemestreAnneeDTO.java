@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.Map;
 
 @Data
 @NoArgsConstructor
@@ -16,5 +17,5 @@ public class NotesSemestreAnneeDTO {
     private String prenom;
     private String anneeUniversitaire;
     private String semestre;
-    private List<NoteDetailDTO> notes;
+    private Map<String, List<NoteDetailDTO>> notesParParcours; // Pour S4: parcours -> notes, pour autres: clé unique -> notes
 }

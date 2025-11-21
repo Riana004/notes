@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.util.Map;
 
 @Data
 @NoArgsConstructor
@@ -17,6 +18,5 @@ public class EtudiantMoyennesDTO {
     private BigDecimal moyenneS1;
     private BigDecimal moyenneS2;
     private BigDecimal moyenneS3;
-    private BigDecimal moyenneS4;
-    private String parcoursS4;
+    private Map<String, BigDecimal> moyennesS4; // Map parcours -> moyenne
 }

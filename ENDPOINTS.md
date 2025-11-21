@@ -29,7 +29,7 @@ Retourne la liste de tous les semestres disponibles.
 ### 2. Liste des étudiants avec leurs moyennes S1 à S4
 **GET** `/api/notes/etudiants/moyennes`
 
-Retourne tous les étudiants avec leurs moyennes pour chaque semestre (S1 à S4). Pour S4, le parcours est automatiquement détecté.
+Retourne tous les étudiants avec leurs moyennes pour chaque semestre (S1 à S4). Pour S4, les moyennes pour tous les parcours sont calculées.
 
 **Réponse:**
 ```json
@@ -42,8 +42,11 @@ Retourne tous les étudiants avec leurs moyennes pour chaque semestre (S1 à S4)
     "moyenneS1": 12.50,
     "moyenneS2": 13.25,
     "moyenneS3": 14.00,
-    "moyenneS4": 15.00,
-    "parcoursS4": "Développement"
+    "moyennesS4": {
+      "Développement": 15.00,
+      "Bases de Données et Réseaux": 14.50,
+      "Web et Design": 13.75
+    }
   }
 ]
 ```
@@ -103,7 +106,7 @@ Retourne le relevé de notes détaillé d'un étudiant pour un semestre donné.
 ### 4. Informations d'un étudiant avec moyennes
 **GET** `/api/notes/etudiants/{idEtudiant}/info`
 
-Retourne les informations d'un étudiant avec ses moyennes pour tous les semestres.
+Retourne les informations d'un étudiant avec ses moyennes pour tous les semestres. Pour S4, les moyennes pour tous les parcours sont calculées.
 
 **Paramètres:**
 - `idEtudiant` (path) : ID de l'étudiant
@@ -120,7 +123,11 @@ Retourne les informations d'un étudiant avec ses moyennes pour tous les semestr
   "moyenneS1": 12.50,
   "moyenneS2": 13.25,
   "moyenneS3": 14.00,
-  "moyenneS4": 15.00
+  "moyennesS4": {
+    "Développement": 15.00,
+    "Bases de Données et Réseaux": 14.50,
+    "Web et Design": 13.75
+  }
 }
 ```
 
@@ -129,7 +136,7 @@ Retourne les informations d'un étudiant avec ses moyennes pour tous les semestr
 ### 5. Notes par semestre pour une année universitaire
 **GET** `/api/notes/etudiants/{idEtudiant}/annee/{anneeUniversitaire}`
 
-Retourne les notes de tous les semestres d'une année universitaire (L1 ou L2) pour un étudiant.
+Retourne les notes de tous les semestres d'une année universitaire (L1 ou L2) pour un étudiant. Pour S4, les notes de tous les parcours sont retournées.
 
 **Paramètres:**
 - `idEtudiant` (path) : ID de l'étudiant
@@ -147,24 +154,38 @@ Retourne les notes de tous les semestres d'une année universitaire (L1 ou L2) p
     "prenom": "Jean",
     "anneeUniversitaire": "L1",
     "semestre": "S1",
-    "notes": [
-      {
-        "ue": "INF101",
-        "intitule": "Programmation procédurale",
-        "credit": 7,
-        "note": 14.00,
-        "isOption": false
-      }
-    ]
+    "notesParParcours": {
+      "Connaissances Scientifiques et Techniques de Base": [
+        {
+          "ue": "INF101",
+          "intitule": "Programmation procédurale",
+          "credit": 7,
+          "note": 14.00,
+          "isOption": false
+        }
+      ]
+    }
   },
   {
     "idEtudiant": 1,
     "matricule": "ETU001",
     "nom": "Dupont",
     "prenom": "Jean",
-    "anneeUniversitaire": "L1",
-    "semestre": "S2",
-    "notes": [...]
+    "anneeUniversitaire": "L2",
+    "semestre": "S4",
+    "notesParParcours": {
+      "Développement": [
+        {
+          "ue": "INF207",
+          "intitule": "Éléments d'algorithmique",
+          "credit": 6,
+          "note": 15.00,
+          "isOption": false
+        }
+      ],
+      "Bases de Données et Réseaux": [...],
+      "Web et Design": [...]
+    }
   }
 ]
 ```
@@ -194,7 +215,7 @@ Retourne les notes de tous les semestres d'une année universitaire (L1 ou L2) p
 
 ## Notes importantes
 
-1. **Parcours S4** : Le système détecte automatiquement le parcours d'un étudiant en S4 en analysant les matières pour lesquelles il a des notes.
+1. **Parcours S4** : Pour les endpoints retournant les moyennes, toutes les moyennes pour les 3 parcours S4 (Développement, Bases de Données et Réseaux, Web et Design) sont calculées et retournées.
 
 2. **Calcul de moyenne** : La moyenne est pondérée par les crédits de chaque matière.
 
