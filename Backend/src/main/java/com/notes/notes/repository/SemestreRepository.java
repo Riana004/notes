@@ -8,5 +8,6 @@ import java.util.Optional;
 
 @Repository
 public interface SemestreRepository extends JpaRepository<Semestre, Long> {
-    Optional<Semestre> findByNom(String nom);
+    Optional<Semestre> findByLibellle(String libellle);
 }
+

@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Entity
@@ -16,18 +17,16 @@ public class Session {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "id_session")
+    private Long idSession;
     
-    @Column(name = "periode_annee", nullable = false)
-    private Integer periodeAnnee;
+    @Column(nullable = false, length = 50)
+    private String intitule;
     
-    @Column(name = "periode_mois", nullable = false)
-    private Integer periodeMois;
-    
-    @ManyToOne
-    @JoinColumn(name = "id_annee_universitaire", nullable = false)
-    private AnneeUniversitaire anneeUniversitaire;
+    @Column(name = "date_", nullable = false)
+    private LocalDate date;
     
     @OneToMany(mappedBy = "session")
-    private List<Note> notes;
+    private List<Examen> examens;
 }
+
